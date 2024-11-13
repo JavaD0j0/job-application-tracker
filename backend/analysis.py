@@ -1,17 +1,33 @@
 # Author: Mario Rodriguez
 
 from pathlib import Path
-from datetime import datetime
 import pandas as pd
 
 RESULT_FOLDER = Path("results")
 RESULT_FOLDER.mkdir(exist_ok=True)
 
 def analyze_file(filepath):
+    """
+    Analyzes a job application Excel file and returns summarized insights along with a cleaned dataset.
+
+    Parameters:
+    filepath (str or Path): The file path to the Excel file containing job application data.
+
+    Returns:
+    tuple: A dictionary containing the analysis results and the filename of the saved Excel file.
+
+    The function performs the following operations:
+    1. Reads the Excel file into a DataFrame.
+    2. Renames columns for standardized access.
+    3. Cleans the data by removing rows with missing values in essential columns.
+    4. Converts the 'Application_Date' column to datetime format and filters out unparseable dates.
+    5. Counts total applications, remote applications, onsite applications, and various status counts.
+    6. Saves the cleaned and analyzed data to a new Excel file in the results folder.
+    """
+
     # Read the Excel file
     data = pd.read_excel(filepath)
 
-    # Perform data cleaning
     # Rename columns for easy access
     data.columns = [
         "Company", "Role_Title", "Salary_Rate", "Job_Link", "Application_Date",
@@ -55,7 +71,7 @@ def analyze_file(filepath):
     }
     
     # Save the cleaned and analyzed data to a new Excel file in the results folder
-    output_filename = f"Analysis_{filepath.stem}_{datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    output_filename = f"Analysis_{filepath.stem}.xlsx"
     output_filepath = RESULT_FOLDER / output_filename
     data.to_excel(output_filepath, index=False)
     

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Results from './Results';
+import './css/UploadForm.css';
 
 const UploadForm = () => {
   const [file, setFile] = useState(null);
@@ -42,11 +43,11 @@ const UploadForm = () => {
   };
 
   return (
-    <div>
+    <div className='upload-form-container'>
       <h1>Job Application Analysis Tool</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-        <button type="submit">Upload and Analyze</button>
+      <form onSubmit={handleSubmit} className='upload-form'>
+        <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className='upload-input'/>
+        <button type="submit" className='upload-button'>Upload and Analyze</button>
       </form>
 
       {loading && <p>Processing your file...</p>}

@@ -50,6 +50,7 @@ The tool supports `.xlsx` and `.xls` file formats. Make sure your file meets the
 ### What kind of insights will I see?
 
 The tool provides insights on:
+
 - **Total Applications**: Total number of applications uploaded.
 - **Remote vs. Onsite**: Breakdown of applications by remote and onsite roles.
 - **Application Status**: Summary of statuses such as `Pending`, `Rejected`, and more.
