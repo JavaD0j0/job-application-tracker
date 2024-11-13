@@ -3,12 +3,16 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from analysis import analyze_file
 import os
 from pathlib import Path
 from datetime import datetime
 
 app = FastAPI()
+
+# Serve React static files
+app.mount("/static", StaticFiles(directory="build/static"), name="static")
 
 # Enable CORS for frontend-backend communication
 app.add_middleware(
@@ -24,6 +28,15 @@ RESULT_FOLDER = Path("results")
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 RESULT_FOLDER.mkdir(exist_ok=True)
 
+@app.get("/")
+async def serve_frontend():
+    """
+    Serve the React frontend entrypoint.
+
+    Returns:
+        A FileResponse containing the index.html from the React build directory.
+    """
+    return FileResponse("build/index.html")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -65,20 +78,13 @@ async def upload_file(file: UploadFile = File(...)):
         'rejectedApplications': analysis_results['rejected_applications']
         # 'filename': output_filename
     })
-    
-    
+
 # @app.get("/download/{filename}")
 # async def download_file(filename: str):
 #     file_path = RESULT_FOLDER / filename
 #     if not file_path.exists():
 #         raise HTTPException(status_code=404, detail="File not found.")
 #     return FileResponse(path=file_path, filename=filename, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-
-@app.get("/")
-async def root():
-    return {"message": "FastAPI is running..."}
-
 
 if __name__ == "__main__":
     import uvicorn
