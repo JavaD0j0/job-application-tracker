@@ -1,0 +1,14 @@
+# Virtual environment
+venv/
+
+# Node dependencies
+frontend/node_modules/
+frontend/build/
+
+# Uploaded files and generated results
+backend/uploads/
+results/
+
+# Python cache
+__pycache__/
+*.pyc
