@@ -3,22 +3,25 @@
 import sys
 from pathlib import Path
 
-# Add the root project directory to Python's module path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+# Add the root project directory to Python's module path dynamically
+root_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_dir))
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from backend.analysis import analyze_file
-import os
-from pathlib import Path
-from datetime import datetime
 
 app = FastAPI()
 
+# Determine the path to the React build directory
+static_dir = Path(__file__).resolve().parent / "frontend" / "build"
+if not static_dir.is_dir():
+    raise RuntimeError(f"Frontend Build directory not found at {static_dir}")
+
 # Serve React static files
-app.mount("/static", StaticFiles(directory="build/static"), name="static")
+app.mount("/static", StaticFiles(directory=static_dir / "static"), name="static")
 
 # Enable CORS for frontend-backend communication
 app.add_middleware(
@@ -42,7 +45,7 @@ async def serve_frontend():
     Returns:
         A FileResponse containing the index.html from the React build directory.
     """
-    return FileResponse("build/index.html")
+    return FileResponse(static_dir / "index.html")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
