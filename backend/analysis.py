@@ -8,7 +8,7 @@ RESULT_FOLDER.mkdir(exist_ok=True)
 
 def analyze_file(filepath):
     """
-    Analyzes a job application Excel file and returns summarized insights along with a cleaned dataset.
+    Analyzes a job application Excel file and returns summarized insights.
 
     Parameters:
     filepath (str or Path): The file path to the Excel file containing job application data.
@@ -71,8 +71,9 @@ def analyze_file(filepath):
     }
     
     # Save the cleaned and analyzed data to a new Excel file in the results folder
-    output_filename = f"Analysis_{filepath.stem}.xlsx"
-    output_filepath = RESULT_FOLDER / output_filename
-    data.to_excel(output_filepath, index=False)
+    # output_filename = f"Analysis_{filepath.stem}.xlsx"
+    # output_filepath = RESULT_FOLDER / output_filename
+    # data.to_excel(output_filepath, index=False)
     
-    return analysis_results, output_filename
+    # return analysis_results, output_filename
+    return analysis_results

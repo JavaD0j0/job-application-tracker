@@ -9,7 +9,6 @@ This web application provides users with a quick way to upload an Excel file of 
   - Total applications
   - Remote vs. onsite applications
   - Application status breakdown (e.g., pending, rejected)
-- **Downloadable Report**: Get a customized Excel report with summaries and visualizations.
 
 ## How to Use
 
@@ -27,7 +26,7 @@ Ensure your Excel file contains the following columns:
 | **Role Title**      | The position title you applied for.                                |
 | **Application Date**| The date you submitted your application (format: `MM/DD/YYYY`).    |
 | **Is Remote**       | Indicates if the role is remote (`Yes` or `No`).                   |
-| **Response Status** | Your current application status (`Waiting...`, `Rejected`, etc.).  |
+| **Response Status** | Your current application status (`Waiting`, `Rejected`, `Recieved Offer`, etc.).  |
 
 > Note: Columns can be in any order, but they should contain the information above for the best results.
 
@@ -38,8 +37,6 @@ Ensure your Excel file contains the following columns:
    - **Total Applications**
    - **Remote vs. Onsite Breakdown**
    - **Application Status Summary**
-
-3. **Download Report**: Click "Download Detailed Report" to download an Excel file with in-depth analysis and visualizations of your data.
 
 ## FAQ
 
@@ -54,10 +51,6 @@ The tool provides insights on:
 - **Total Applications**: Total number of applications uploaded.
 - **Remote vs. Onsite**: Breakdown of applications by remote and onsite roles.
 - **Application Status**: Summary of statuses such as `Pending`, `Rejected`, and more.
-
-### Is my data secure?
-
-Yes! Your data is processed securely, and uploaded files are only temporarily stored to provide the analysis. Once processing is complete, all data is deleted.
 
 ### Can I use this tool on my mobile device?
 

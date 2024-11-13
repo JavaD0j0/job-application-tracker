@@ -27,6 +27,24 @@ RESULT_FOLDER.mkdir(exist_ok=True)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+    """
+    Upload an Excel file and receive analysis results in JSON format.
+
+    Args:
+        file: The Excel file to be analyzed.
+
+    Returns:
+        A JSON response containing the analysis results with the following keys:
+
+        totalApplications: The total number of applications
+        remoteApplications: The number of remote applications
+        onsiteApplications: The number of onsite applications
+        pendingApplications: The number of pending applications
+        rejectedApplications: The number of rejected applications
+
+    Raises:
+        HTTPException: If the file is not an Excel file (with .xlsx or .xls extension)
+    """
     if not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an Excel file.")
 
@@ -36,24 +54,25 @@ async def upload_file(file: UploadFile = File(...)):
         f.write(file.file.read())
 
     # Perform analysis
-    analysis_results, output_filename = analyze_file(upload_path)
+    # analysis_results, output_filename = analyze_file(upload_path)
+    analysis_results = analyze_file(upload_path)
 
     return JSONResponse({
         'totalApplications': analysis_results['total_applications'],
         'remoteApplications': analysis_results['remote_applications'],
         'onsiteApplications': analysis_results['onsite_applications'],
         'pendingApplications': analysis_results['pending_applications'],
-        'rejectedApplications': analysis_results['rejected_applications'],
-        'filename': output_filename
+        'rejectedApplications': analysis_results['rejected_applications']
+        # 'filename': output_filename
     })
     
     
-@app.get("/download/{filename}")
-async def download_file(filename: str):
-    file_path = RESULT_FOLDER / filename
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found.")
-    return FileResponse(path=file_path, filename=filename, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+# @app.get("/download/{filename}")
+# async def download_file(filename: str):
+#     file_path = RESULT_FOLDER / filename
+#     if not file_path.exists():
+#         raise HTTPException(status_code=404, detail="File not found.")
+#     return FileResponse(path=file_path, filename=filename, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 @app.get("/")
