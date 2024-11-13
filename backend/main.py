@@ -1,10 +1,16 @@
 # Author: Mario Rodriguez
 
+import sys
+from pathlib import Path
+
+# Add the root project directory to Python's module path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from analysis import analyze_file
+from backend.analysis import analyze_file
 import os
 from pathlib import Path
 from datetime import datetime
