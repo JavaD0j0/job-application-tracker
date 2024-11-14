@@ -3,10 +3,6 @@
 import sys
 from pathlib import Path
 
-# Set the root directory as the main module path
-root_dir = Path(__file__).resolve().parent
-sys.path.insert(0, str(root_dir))
-
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,13 +11,8 @@ from analysis import analyze_file
 
 app = FastAPI()
 
-# Path to the React build directory in `frontend`
-static_dir = Path(__file__).resolve().parent.parent / "frontend" / "build"
-if not static_dir.is_dir():
-    raise RuntimeError(f"Build directory not found at {static_dir}")
-
 # Serve React static files
-app.mount("/static", StaticFiles(directory=static_dir / "static"), name="static")
+app.mount("/static", StaticFiles(directory="build/static"), name="static")
 
 # Enable CORS for frontend-backend communication
 app.add_middleware(
@@ -45,7 +36,7 @@ async def serve_frontend():
     Returns:
         A FileResponse containing the index.html from the React build directory.
     """
-    return FileResponse(static_dir / "index.html")
+    return FileResponse("build/index.html")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -97,4 +88,4 @@ async def upload_file(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
