@@ -3,22 +3,22 @@
 import sys
 from pathlib import Path
 
-# Add the root project directory to Python's module path dynamically
-root_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_dir))
+# Set the root directory as the main module path
+root_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(root_dir))
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from backend.analysis import analyze_file
+from analysis import analyze_file
 
 app = FastAPI()
 
-# Determine the path to the React build directory
-static_dir = Path(__file__).resolve().parent / "frontend" / "build"
+# Path to the React build directory in `frontend`
+static_dir = Path(__file__).resolve().parent.parent / "frontend" / "build"
 if not static_dir.is_dir():
-    raise RuntimeError(f"Frontend Build directory not found at {static_dir}")
+    raise RuntimeError(f"Build directory not found at {static_dir}")
 
 # Serve React static files
 app.mount("/static", StaticFiles(directory=static_dir / "static"), name="static")
