@@ -31,7 +31,6 @@ const UploadForm = () => {
 
     try {
       // Need to set an env variable to detect if its local or production
-      // const baseURL = 'http://localhost:8000';
       const baseURL = process.env.NODE_ENV === 'production'
         ? 'https://job-application-tracker-3mct.onrender.com'
         : 'http://localhost:8000';
@@ -40,9 +39,11 @@ const UploadForm = () => {
       const response = await axios.post(`${baseURL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+      
       console.log("File uploaded successfully:", response.data); // Testing
       setAnalysis(response.data);
       setLoading(false);
+      
     } catch (err) {
       console.error(err.response ? err.response.data : err.message); // Logging the error
       setError('Error uploading file. Please try again.');

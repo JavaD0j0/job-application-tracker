@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
