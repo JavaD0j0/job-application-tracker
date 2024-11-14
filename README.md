@@ -7,14 +7,14 @@ This web application provides users with a quick way to upload an Excel file of 
 - **Upload Excel Files**: Submit an Excel file of your job applications for real-time analysis.
 - **Instant Insights**: Immediately see key insights, including:
   - Total applications
-  - Remote vs. onsite applications
   - Application status breakdown (e.g., pending, rejected)
+  - Remote vs. onsite applications
 
 ## How to Use
 
 ### Step 1: Access the Tool
 
-Visit the website at **[your-website-url.com](https://your-website-url.com)** to begin using the tool. No account or login is required.
+Visit the website at **[Job Application Tracker](https://job-application-tracker-3mct.onrender.com/)** to begin using the tool. No account or login is required.
 
 ### Step 2: Prepare Your Excel File
 
@@ -35,8 +35,8 @@ Ensure your Excel file contains the following columns:
 1. **Upload**: On the homepage, click "Choose File" to select your Excel file, then click "Upload and Analyze."
 2. **View Insights**: After the file uploads, the tool will display quick insights about your applications:
    - **Total Applications**
-   - **Remote vs. Onsite Breakdown**
    - **Application Status Summary**
+   - **Remote vs. Onsite Breakdown**
 
 ## FAQ
 
@@ -68,7 +68,3 @@ Yes! The website is optimized for both desktop and mobile, so you can access it 
 
 3. **Incorrect Insights**:
    - Verify that column names and data are correctly entered in your Excel file. Incorrect or missing data may affect the analysis.
-
-## Contact Support
-
-If you encounter issues or have questions about using the tool, please contact support at **support@your-website-url.com**.
