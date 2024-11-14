@@ -30,7 +30,8 @@ const UploadForm = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/upload', formData, {
+      // Need to set an env variable to detect if its local or production
+      const response = await axios.post('https://job-application-tracker-3mct.onrender.com/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setAnalysis(response.data);

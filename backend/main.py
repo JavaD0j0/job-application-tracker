@@ -7,12 +7,12 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from analysis import analyze_file
+from backend.analysis import analyze_file
 
 app = FastAPI()
 
 # Serve React static files
-app.mount("/static", StaticFiles(directory="build/static"), name="static")
+app.mount("/static", StaticFiles(directory="backend/build/static"), name="static")
 
 # Configure CORS
 origins = [
@@ -41,7 +41,7 @@ async def serve_frontend():
     Returns:
         A FileResponse containing the index.html from the React build directory.
     """
-    return FileResponse("build/index.html")
+    return FileResponse("backend/build/index.html")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
