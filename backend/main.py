@@ -36,7 +36,7 @@ async def serve_frontend():
     Returns:
         A FileResponse containing the index.html from the React build directory.
     """
-    return FileResponse("build/index.html")
+    return FileResponse("backend/build/index.html")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
