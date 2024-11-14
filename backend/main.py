@@ -12,7 +12,7 @@ from backend.analysis import analyze_file
 app = FastAPI()
 
 # Serve React static files
-app.mount("/static", StaticFiles(directory="build/static"), name="static")
+app.mount("/static", StaticFiles(directory="backend/build/static"), name="static")
 
 # Enable CORS for frontend-backend communication
 app.add_middleware(
