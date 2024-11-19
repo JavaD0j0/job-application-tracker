@@ -1,6 +1,7 @@
 # Author: Mario Rodriguez
 
 from pathlib import Path
+from io import BytesIO
 import pandas as pd
 
 RESULT_FOLDER = Path("results")
@@ -26,7 +27,7 @@ def analyze_file(filepath):
     """
 
     # Read the Excel file
-    data = pd.read_excel(filepath)
+    data = pd.read_excel(BytesIO(filepath))
 
     # Rename columns for easy access
     data.columns = [
