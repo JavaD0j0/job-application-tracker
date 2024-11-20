@@ -1,11 +1,13 @@
-# Author: Mario Rodriguez
+"""
+Module for analyzing job application Excel files.
 
-from pathlib import Path
-from io import BytesIO
+This module provides functions for reading, processing, and summarizing 
+job application data from Excel files.
+
+Author: Mario Rodriguez
+"""
+
 import pandas as pd
-
-RESULT_FOLDER = Path("results")
-RESULT_FOLDER.mkdir(exist_ok=True)
 
 def analyze_file(filepath):
     """
@@ -27,12 +29,13 @@ def analyze_file(filepath):
     """
 
     # Read the Excel file
-    data = pd.read_excel(BytesIO(filepath))
+    data = pd.read_excel(filepath)
 
     # Rename columns for easy access
     data.columns = [
         "Company", "Role_Title", "Salary_Rate", "Job_Link", "Application_Date",
-        "Is_Remote", "Contact_Info", "Interview_Stage", "Interview_Info", "Response_Status"
+        "Is_Remote", "Is_Referral","Contact_Info", "Interview_Stage", "Interview_Info", 
+        "Response_Status"
     ]
 
     # Drop any rows with null values in essential columns (e.g., Company, Role_Title)
@@ -70,11 +73,5 @@ def analyze_file(filepath):
         'pending_applications': pending_applications,
         'rejected_applications': rejected_applications
     }
-    
-    # Save the cleaned and analyzed data to a new Excel file in the results folder
-    # output_filename = f"Analysis_{filepath.stem}.xlsx"
-    # output_filepath = RESULT_FOLDER / output_filename
-    # data.to_excel(output_filepath, index=False)
-    
-    # return analysis_results, output_filename
+
     return analysis_results

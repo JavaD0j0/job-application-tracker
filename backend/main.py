@@ -1,7 +1,17 @@
-# Author: Mario Rodriguez
+"""
+Module for handling API requests and responses.
+
+This module provides functions for handling API requests and responses, including 
+uploading and downloading job application Excel files, and analyzing and summarizing 
+job application data.
+
+Author: Mario Rodriguez
+"""
 
 import sys
+import logging
 from pathlib import Path
+from io import BytesIO
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +22,9 @@ app = FastAPI()
 
 # Serve React static files
 app.mount("/static", StaticFiles(directory="backend/build/static"), name="static")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Configure CORS
 origins = [
@@ -26,11 +39,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-UPLOAD_FOLDER = Path("uploads")
-RESULT_FOLDER = Path("results")
-UPLOAD_FOLDER.mkdir(exist_ok=True)
-RESULT_FOLDER.mkdir(exist_ok=True)
 
 @app.get("/")
 async def serve_frontend():
@@ -66,16 +74,12 @@ async def upload_file(file: UploadFile = File(...)):
         if not file.filename.endswith(('.xlsx', '.xls')):
             raise HTTPException(status_code=400, detail="Invalid file type. Please upload an Excel file.")
 
-        # Save the uploaded file
-        # upload_path = UPLOAD_FOLDER / file.filename
-        # with upload_path.open("wb") as f:
-        #     f.write(file.file.read())
-        
-        contents = await file.read()
+        file_stream = BytesIO(await file.read())
 
         # Perform analysis
-        # analysis_results, output_filename = analyze_file(upload_path)
-        analysis_results = analyze_file(contents)
+        file_size = file_stream.getbuffer().nbytes
+        logging.info("Uploaded file size: %s", file_size)
+        analysis_results = analyze_file(file_stream)
 
         return JSONResponse({
             'totalApplications': analysis_results['total_applications'],
@@ -86,14 +90,9 @@ async def upload_file(file: UploadFile = File(...)):
             # 'filename': output_filename
         })
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error("Error durring file upload: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred during file upload.") from e
 
-# @app.get("/download/{filename}")
-# async def download_file(filename: str):
-#     file_path = RESULT_FOLDER / filename
-#     if not file_path.exists():
-#         raise HTTPException(status_code=404, detail="File not found.")
-#     return FileResponse(path=file_path, filename=filename, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 if __name__ == "__main__":
     import uvicorn
