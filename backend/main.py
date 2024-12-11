@@ -8,20 +8,27 @@ job application data.
 Author: Mario Rodriguez
 """
 
-import sys
+import os
 import logging
-from pathlib import Path
+import json
 from io import BytesIO
-from fastapi import FastAPI, File, UploadFile, HTTPException
+import pandas as pd
+from fastapi import FastAPI, Request, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from backend.analysis import analyze_file
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from analysis import analyze_file
 
 app = FastAPI()
 
+# Scopes for accessing Google Sheets
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+
 # Serve React static files
-app.mount("/static", StaticFiles(directory="backend/build/static"), name="static")
+app.mount("/static", StaticFiles(directory="build/static"), name="static")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +47,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Placeholder to store user credentials and sheet ID
+USER_CREDENTIALS = None
+SHEET_ID = "14X_44OptxAmfQLgiw2VXzwA8g25uiGaRYZPvLg-ZIpQ"
+
 @app.get("/")
 async def serve_frontend():
     """
@@ -48,15 +59,34 @@ async def serve_frontend():
     Returns:
         A FileResponse containing the index.html from the React build directory.
     """
-    return FileResponse("backend/build/index.html")
+    return FileResponse("build/index.html")
 
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+@app.get("/authenticate")
+def authenticate(request: Request):
     """
-    Upload an Excel file and receive analysis results in JSON format.
+    Authenticate the user with Google and obtain access to their Google Sheets.
+    """
+    global USER_CREDENTIALS 
 
-    Args:
-        file: The Excel file to be analyzed.
+    credentials_str = os.getenv('GOOGLE_CLIENT_SECRET')
+    if not credentials_str:
+        raise RuntimeError("GOOGLE_CREDENTIALS environment variable is not set")
+
+    credentials_dict = json.loads(credentials_str)
+    flow = InstalledAppFlow.from_client_config(credentials_dict, SCOPES)
+
+    # Dynamically determine the redirect URI
+    base_url = str(request.base_url)
+    flow.redirect_uri = f"{base_url}authenticate/callback"
+
+    credentials = flow.run_local_server(port=0) # for local development
+    USER_CREDENTIALS = credentials
+    return {"message": "Authenticated successfully!"}
+
+@app.post("/analyze-sheet")
+async def analyze_sheet():
+    """
+    Send the data from a linked Google Sheet and receive analysis results in JSON format.
 
     Returns:
         A JSON response containing the analysis results with the following keys:
@@ -71,15 +101,22 @@ async def upload_file(file: UploadFile = File(...)):
         HTTPException: If the file is not an Excel file (with .xlsx or .xls extension)
     """
     try:
-        if not file.filename.endswith(('.xlsx', '.xls')):
-            raise HTTPException(status_code=400, detail="Invalid file type. Please upload an Excel file.")
-
-        file_stream = BytesIO(await file.read())
-
+        # If a Google Sheet is linked, read from Google Sheets
+        if SHEET_ID and USER_CREDENTIALS:
+            logging.info("Reading data from linked Google Sheet...")
+            service = build('sheets', 'v4', credentials=USER_CREDENTIALS)
+            sheet = service.spreadsheets()
+            result = sheet.values().get(spreadsheetId=SHEET_ID, range="Sheet1").execute()
+            values = result.get('values', [])
+            
+            # Convert to pandas DataFrame
+            df = pd.DataFrame(values[1:], columns=values[0])
+            
+        else:
+            raise HTTPException(status_code=400, detail="No Google Sheet linked.")
+        
         # Perform analysis
-        file_size = file_stream.getbuffer().nbytes
-        logging.info("Uploaded file size: %s", file_size)
-        analysis_results = analyze_file(file_stream)
+        analysis_results = analyze_file(df)
 
         return JSONResponse({
             'totalApplications': analysis_results['total_applications'],
@@ -87,11 +124,10 @@ async def upload_file(file: UploadFile = File(...)):
             'onsiteApplications': analysis_results['onsite_applications'],
             'pendingApplications': analysis_results['pending_applications'],
             'rejectedApplications': analysis_results['rejected_applications']
-            # 'filename': output_filename
         })
     except Exception as e:
-        logging.error("Error durring file upload: %s", e, exc_info=True)
-        raise HTTPException(status_code=500, detail="An error occurred during file upload.") from e
+        logging.error("Error durring analysis: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred while analyzing the file.") from e
 
 
 if __name__ == "__main__":

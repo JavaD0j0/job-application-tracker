@@ -9,32 +9,28 @@ Author: Mario Rodriguez
 
 import pandas as pd
 
-def analyze_file(filepath):
+def analyze_file(data):
     """
     Analyzes a job application Excel file and returns summarized insights.
 
     Parameters:
-    filepath (str or Path): The file path to the Excel file containing job application data.
+    data (pandas.DataFrame): A DataFrame containing the job application data.
 
     Returns:
     tuple: A dictionary containing the analysis results and the filename of the saved Excel file.
 
     The function performs the following operations:
-    1. Reads the Excel file into a DataFrame.
-    2. Renames columns for standardized access.
-    3. Cleans the data by removing rows with missing values in essential columns.
-    4. Converts the 'Application_Date' column to datetime format and filters out unparseable dates.
-    5. Counts total applications, remote applications, onsite applications, and various status counts.
-    6. Saves the cleaned and analyzed data to a new Excel file in the results folder.
+    1. Renames columns for standardized access.
+    2. Cleans the data by removing rows with missing values in essential columns.
+    3. Converts the 'Application_Date' column to datetime format and filters out unparseable dates.
+    4. Counts total applications, remote applications, onsite applications, and various status counts.
+    5. Saves the cleaned and analyzed data to a new Excel file in the results folder.
     """
-
-    # Read the Excel file
-    data = pd.read_excel(filepath)
 
     # Rename columns for easy access
     data.columns = [
         "Company", "Role_Title", "Salary_Rate", "Job_Link", "Application_Date",
-        "Is_Remote", "Is_Referral","Contact_Info", "Interview_Stage", "Interview_Info", 
+        "Is_Remote", "Is_Referral", "Contact_Info", "Interview_Stage", "Interview_Info", 
         "Response_Status"
     ]
 

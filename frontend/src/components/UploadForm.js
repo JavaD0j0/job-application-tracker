@@ -6,28 +6,29 @@ import Results from './Results';
 import './css/UploadForm.css';
 
 const UploadForm = () => {
-  const [file, setFile] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setAnalysis(null);
-    setError(null);
+  const handleAuthenticate = (e) => {
+    try {
+      // Need to set an env variable to detect if its local or production
+      const baseURL = process.env.NODE_ENV === 'production'
+      ? 'https://job-application-tracker-3mct.onrender.com'
+      : 'http://localhost:8000';
+
+      console.log("Base URL:", baseURL);
+      window.location.href = `${baseURL}/authenticate`;
+    } catch (err) {
+      console.error(err.response ? err.response.data : err.message); // Logging the error
+      setError('Error authenticating with Google. Please try again.');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!file) {
-      setError('Please select an Excel file to upload.');
-      return;
-    }
-
     setLoading(true);
-    const formData = new FormData();
-    formData.append('file', file);
 
     try {
       // Need to set an env variable to detect if its local or production
@@ -36,17 +37,15 @@ const UploadForm = () => {
         : 'http://localhost:8000';
 
       console.log("Base URL:", baseURL);
-      const response = await axios.post(`${baseURL}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await axios.post(`${baseURL}/analyze-sheet`);
       
-      console.log("File uploaded successfully:", response.data); // Testing
       setAnalysis(response.data);
+      setSuccess('Analysis completed successfully!');
       setLoading(false);
       
     } catch (err) {
       console.error(err.response ? err.response.data : err.message); // Logging the error
-      setError('Error uploading file. Please try again.');
+      setError('Error analyzing the linked Google Sheet. Please try again.');
       setLoading(false);
     }
   };
@@ -54,14 +53,27 @@ const UploadForm = () => {
   return (
     <div className='upload-form-container'>
       <h1>Job Application Analysis Tool</h1>
-      <form onSubmit={handleSubmit} className='upload-form'>
-        <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className='upload-input'/>
-        <button type="submit" className='upload-button'>Upload and Analyze</button>
-      </form>
 
-      {loading && <p>Processing your file...</p>}
+      <p className="instructions">
+        Ensure you have authenticated with Google and linked the correct Google
+        Sheet before running the analysis.
+      </p>
+
+      <div className="button-group">
+        {/* Button for Google Authentication */}
+        <button onClick={handleAuthenticate} className='auth-button'>
+          Authenticate with Google
+        </button>
+
+        {/* Button for Analyzing the Linked Google Sheet */}
+        <button onClick={handleSubmit} className='upload-button'>
+          Analyze Linked Google Sheet
+        </button>
+      </div>
+
+      {loading && <p>Processing your Google Sheet...</p>}
+      {success && <p style={{ color: 'green' }}>{success}</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
-
       {analysis && <Results data={analysis} />}
     </div>
   );
