@@ -14,7 +14,7 @@ import json
 from io import BytesIO
 import pandas as pd
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from google.oauth2.credentials import Credentials
@@ -66,22 +66,61 @@ def authenticate(request: Request):
     """
     Authenticate the user with Google and obtain access to their Google Sheets.
     """
-    global USER_CREDENTIALS 
-
     credentials_str = os.getenv('GOOGLE_CLIENT_SECRET')
     if not credentials_str:
-        raise RuntimeError("GOOGLE_CREDENTIALS environment variable is not set")
+        raise RuntimeError("GOOGLE_CLIENT_SECRET environment variable is not set")
 
     credentials_dict = json.loads(credentials_str)
+    
+    # Initialize the flow
     flow = InstalledAppFlow.from_client_config(credentials_dict, SCOPES)
 
     # Dynamically determine the redirect URI
-    base_url = str(request.base_url)
-    flow.redirect_uri = f"{base_url}authenticate/callback"
+    base_url = str(request.base_url).rstrip("/")
+    flow.redirect_uri = f"{base_url}/authenticate/callback"
+    logging.info("Redirect URI: %s", flow.redirect_uri)
+    
+    if "localhost" in base_url:
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Allow HTTP for local development
 
-    credentials = flow.run_local_server(port=0) # for local development
+    # Generate the authorization URL
+    auth_url, _ = flow.authorization_url(prompt="consent")
+
+    # Redirect the user to Google's OAuth consent page
+    return RedirectResponse(auth_url)
+
+@app.get("/authenticate/callback")
+def authenticate_callback(request: Request):
+    """
+    Handle the callback from Google's OAuth server and complete the authentication.
+    """
+    global USER_CREDENTIALS
+
+    # Load credentials from environment variable
+    credentials_str = os.getenv("GOOGLE_CLIENT_SECRET")
+    if not credentials_str:
+        raise RuntimeError("GOOGLE_CLIENT_SECRET environment variable is not set")
+
+    credentials_dict = json.loads(credentials_str)
+
+    # Initialize the flow
+    flow = InstalledAppFlow.from_client_config(credentials_dict, SCOPES)
+    base_url = str(request.base_url).rstrip("/")
+    flow.redirect_uri = f"{base_url}/authenticate/callback"
+    logging.info("Redirect URI: %s", flow.redirect_uri)
+
+    # Parse the authorization response
+    auth_response = str(request.url)
+    credentials = flow.fetch_token(authorization_response=auth_response)
+
+    # Store the credentials for later use
     USER_CREDENTIALS = credentials
-    return {"message": "Authenticated successfully!"}
+    frontend_url = (
+        "https://job-application-tracker-3mct.onrender.com"
+        if os.getenv("ENV") == "production"
+        else "http://localhost:3000"
+    )
+    return RedirectResponse(frontend_url)
 
 @app.post("/analyze-sheet")
 async def analyze_sheet():
