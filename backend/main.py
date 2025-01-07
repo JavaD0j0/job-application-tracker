@@ -86,8 +86,11 @@ async def upload_file(file: UploadFile = File(...)):
             'remoteApplications': analysis_results['remote_applications'],
             'onsiteApplications': analysis_results['onsite_applications'],
             'pendingApplications': analysis_results['pending_applications'],
-            'rejectedApplications': analysis_results['rejected_applications']
-            # 'filename': output_filename
+            'notAvailableApplications': analysis_results['not_available_applications'],
+            'rejectedApplications': analysis_results['rejected_applications'],
+            'applicationsByMonth': analysis_results['applications_by_month'],
+            'applicationsByCompany': analysis_results['applications_by_company'],
+            'applicationsByRoleTitle': analysis_results['applications_by_role_title'],
         })
     except Exception as e:
         logging.error("Error durring file upload: %s", e, exc_info=True)

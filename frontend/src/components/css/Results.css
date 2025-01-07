@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Ensures vertical and horizontal alignment */
+    justify-content: space-between; /* Ensures vertical and horizontal alignment */
     margin-top: 20px;
     width: 100%; /* Allows the container to take full width for centering */
     text-align: center;
@@ -48,26 +48,23 @@
     background-color: #f5f5f5; /* Light gray background */
     color: #333; /* Dark text color */
   }
-  
-  .chart-container {
-    width: 80%;
-    max-width: 600px;
-    margin: 20px auto;
-  }
 
-  .download-link {
-    display: inline-block;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 8px 16px;
-    color: white;
-    background-color: #007bff;
-    text-decoration: none;
-    border-radius: 2px;
-    font-size: 20px;
+  .table-container {
+    flex: 1;
+    margin-right: 20px;
+    display: flex; /* Add this line */
+    flex-direction: row; /* Add this line */
+    justify-content: space-between; /* Add this line */
   }
   
-  .download-link:hover {
-    background-color: #125dae;
+  .bar-container {
+    flex: 1;
+    margin: 20px;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
-  

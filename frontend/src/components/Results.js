@@ -1,7 +1,7 @@
 // Author: Mario Rodriguez
 
 import React from 'react';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,49 +23,133 @@ const Results = ({
   rowBgColor = '#f5f5f5',
   rowTextColor = '#333',
 }) => {
-  // Prepare data for charts
-  const barChartData = {
-    labels: ['Total', 'Pending', 'Rejected', 'Remote', 'Onsite'],
+  // Prepare data for chart
+  const monthOrder = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'
+  ];
+  
+  const sortedMonths = Object.keys(data.applicationsByMonth).sort((a, b) => {
+    const [yearA, monthA] = a.split('-').map(Number);
+    const [yearB, monthB] = b.split('-').map(Number);
+  
+    if (yearA === yearB) {
+      return monthA - monthB;
+    } else {
+      return yearA - yearB;
+    }
+  });
+  
+  const applicationsByMonthData = {
+    labels: sortedMonths.map(date => {
+      const [year, month] = date.split('-');
+      return `${monthOrder[parseInt(month, 10) - 1]} ${year}`;
+    }),
     datasets: [
       {
-        label: 'Applications Counts',
-        data: [
-          data.totalApplications,
-          data.pendingApplications,
-          data.rejectedApplications,
-          data.remoteApplications,
-          data.onsiteApplications
-        ],
-        backgroundColor: [
-          '#4CAF50', // Green for Total
-          '#FF8C00', // Orange for Pending
-          '#DC143C', // Red for Rejected
-          '#1E90FF', // Blue for Remote
-          '#FFD700', // Yellow for Onsite
-        ],
+        label: 'Applications by Month',
+        data: sortedMonths.map(month => data.applicationsByMonth[month]),
+        backgroundColor: 'rgba(153, 102, 255, 0.6)',
       },
     ],
   };
 
-  const pieChartData = {
-    labels: ['Remote', 'Onsite'],
-    datasets: [
-      {
-        label: 'Application Types',
-        data: [data.remoteApplications, data.onsiteApplications],
-        backgroundColor: ['#1E90FF', '#FFD700'],
+  const barChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
       },
-    ],
+      tooltip: {
+        enabled: true,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        grid: {
+          display: true,
+          color: '#e0e0e0',
+        },
+      },
+    },
+    elements: {
+      bar: {
+        borderRadius: 10,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) {
+            return null;
+          }
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, '#4CAF50');
+          gradient.addColorStop(1, '#1E90FF');
+          return gradient;
+        },
+      },
+    },
   };
+
+  const tableData = [
+    { label: 'Total Applications', value: data.totalApplications },
+    { label: 'Pending Status', value: data.pendingApplications },
+    { label: 'No Longer Available Status', value: data.notAvailableApplications },
+    { label: 'Rejected Status', value: data.rejectedApplications },
+    { label: 'Remote Positions', value: data.remoteApplications },
+    { label: 'Onsite Positions', value: data.onsiteApplications },
+  ];
+
+  const roleTitleTableData = Object.keys(data.applicationsByRoleTitle)
+    .sort((a, b) => data.applicationsByRoleTitle[b] - data.applicationsByRoleTitle[a])
+    .slice(0, 10)
+    .map((roleTitle, index) => (
+      <tr key={index}>
+        <td>{roleTitle}</td>
+        <td>{data.applicationsByRoleTitle[roleTitle]}</td>
+      </tr>
+  ));
 
   return (
     <div className="results-container">
-      <h2 className="results-title">Analysis Results</h2>
+      <div className='table-container'>
+        <div>
+          <table className="results-table" style={{
+              '--header-bg-color': headerBgColor,
+              '--header-text-color': headerTextColor,
+              '--row-bg-color': rowBgColor,
+              '--row-text-color': rowTextColor
+            }}
+          >
+            <thead>
+              <tr>
+                <th>Insight</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row, index) => (
+                <tr key={index}>
+                  <td>{row.label}</td>
+                  <td>{row.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Display Table */}
-      <table 
-        className="results-table"
-        style={{
+        <div className="bar-container">
+          <h3>Applications by Month</h3>
+          <Bar data={applicationsByMonthData} options={barChartOptions} />
+        </div>
+      </div>
+
+      <h2 className="results-title">Applications by Role Title (Top 10)</h2>
+      <table className="results-table" style= {{
           '--header-bg-color': headerBgColor,
           '--header-text-color': headerTextColor,
           '--row-bg-color': rowBgColor,
@@ -74,49 +158,14 @@ const Results = ({
       >
         <thead>
           <tr>
-            <th>Insight</th>
-            <th>Value</th>
+            <th>Role Title</th>
+            <th>Total</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Total Applications</td>
-            <td>{data.totalApplications}</td>
-          </tr>
-          <tr>
-            <td>Pending Status</td>
-            <td>{data.pendingApplications}</td>
-          </tr>
-          <tr>
-            <td>Rejected Status</td>
-            <td>{data.rejectedApplications}</td>
-          </tr>
-          <tr>
-            <td>Remote Positions</td>
-            <td>{data.remoteApplications}</td>
-          </tr>
-          <tr>
-            <td>Onsite Positions</td>
-            <td>{data.onsiteApplications}</td>
-          </tr>
+          {roleTitleTableData}
         </tbody>
       </table>
-
-      {/* Display Bar Chart */}
-      <div className="chart-container">
-        <h3>Application Distribution</h3>
-        <Bar data={barChartData} options={{ responsive: true }} />
-      </div>
-
-      {/* Display Pie Chart */}
-      <div className="chart-container">
-        <h3>Remote vs. Onsite Applications</h3>
-        <Pie data={pieChartData} options={{ responsive: true }} />
-      </div>
-
-      {/* <a href={`http://localhost:5000/download/${data.filename}`} download className="download-link">
-        Download Detailed Report
-      </a> */}
     </div>
   );
 };

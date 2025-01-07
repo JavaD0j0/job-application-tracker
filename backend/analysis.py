@@ -42,28 +42,30 @@ def analyze_file(filepath):
     data = data.dropna(subset=["Company", "Role_Title", "Application_Date"])
 
     # Convert 'Application_Date' column to datetime format
-    data['Application_Date'] = pd.to_datetime(data['Application_Date'], errors='coerce')
+    data['Application_Date'] = pd.to_datetime(data['Application_Date'], format='%m/%d/%Y', errors='coerce')
+    
+    # Applications by Month
+    data['Application_Month'] = data['Application_Date'].dt.to_period('M')
+    applications_by_month = data['Application_Month'].value_counts().to_dict()
+    applications_by_month = {str(k): v for k, v in applications_by_month.items()}
 
     # Filter out rows where 'Application_Date' could not be parsed
     data = data.dropna(subset=["Application_Date"])
+    
+    # Applications by Company
+    applications_by_company = data['Company'].value_counts().to_dict()
 
-    # Count total applications
-    total_applications = len(data)
-
-    # Count remote and onsite applications
-    remote_applications = data[data['Is_Remote'] == 'Yes'].shape[0]
-    onsite_applications = data[data['Is_Remote'] == 'No'].shape[0]
-
-    # Count application statuses
-    pending_applications = data[data['Response_Status'] == 'Waiting...'].shape[0]
-    rejected_applications = data[data['Response_Status'] == 'Rejected'].shape[0]
+    # Applications by Role Title
+    applications_by_role_title = data['Role_Title'].value_counts().to_dict()
 
     # Generate analysis results
     total_applications = len(data)
     remote_applications = data[data['Is_Remote'] == 'Yes'].shape[0]
     onsite_applications = data[data['Is_Remote'] == 'No'].shape[0]
     pending_applications = data[data['Response_Status'] == 'Waiting...'].shape[0]
+    not_available_applications = data[data['Response_Status'] == 'No Longer Available'].shape[0]
     rejected_applications = data[data['Response_Status'] == 'Rejected'].shape[0]
+    
     
     # Generate summary dictionary
     analysis_results = {
@@ -71,7 +73,11 @@ def analyze_file(filepath):
         'remote_applications': remote_applications,
         'onsite_applications': onsite_applications,
         'pending_applications': pending_applications,
-        'rejected_applications': rejected_applications
+        'not_available_applications': not_available_applications,
+        'rejected_applications': rejected_applications,
+        'applications_by_month': applications_by_month,
+        'applications_by_company': applications_by_company,
+        'applications_by_role_title': applications_by_role_title
     }
 
     return analysis_results
